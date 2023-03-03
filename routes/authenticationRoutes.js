@@ -82,7 +82,7 @@ module.exports = app => {
         {
             res.send("Not enough info")
             return;
-        }
+        } //test
         var userAccount = await Account.findOne({ username : rUsername});
         var dulp = parseInt(userAccount.item[rItemName]);
         console.log(dulp);
