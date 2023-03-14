@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Account = mongoose.model('accounts');
 const Item = mongoose.model('items');
 
-
 module.exports = app => {
 
 //Routes
@@ -31,8 +30,6 @@ module.exports = app => {
         res.send('Invalid credentials');
         return;
     })
-
-
 
     app.post('/account/create', async (req, res) => {
 
