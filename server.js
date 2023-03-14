@@ -1,5 +1,6 @@
+require("dotenv").config();
 const express = require('express');
-const keys = require('./config/keys.js');
+
 const app = express();
 const bodyParser = require('body-parser');
 
@@ -10,7 +11,7 @@ app.use(express.json());
 const mongoose = require('mongoose');
 mongoose.set('strictQuery',false);
 
-mongoose.connect(keys.mongoURI, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(process.env.mongoURI, {useNewUrlParser: true});
 
 //Setup database models
 require('./model/Account');
@@ -20,6 +21,6 @@ require('./model/Item');
 require('./routes/authenticationRoutes')(app);
 
 const port = 13756
-app.listen(keys.port, () => {
+app.listen(port, () => {
     console.log("Listening on " + port)
 })
