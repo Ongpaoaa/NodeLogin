@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const Account = mongoose.model('accounts');
-const Item = mongoose.model('items');
+
 
 module.exports = app => {
 
 //Routes
+
     app.post('/account/login', async (req, res) => {
 
         const { rUsername, rPassword} = req.body;
@@ -37,7 +38,7 @@ module.exports = app => {
         const {rEmail, rUsername, rPassword} = req.body;
         if(rEmail == null || rUsername == null || rPassword == null)
         {
-            console.log(rEmail);
+            
             res.send("Invalid credentials")
             return;
         }
@@ -103,7 +104,7 @@ module.exports = app => {
                 {$set: obj2});
             res.send("complete2");
         }
-
+        
         // if(userAccount == null)
         // {
         //     res.send("There is no user")
@@ -118,38 +119,4 @@ module.exports = app => {
 
         })
 
-    app.post('/item/create', async (req, res) => {
-        const {rName, rRarity, rDescription} = req.body;
-        if(rName == null || rRarity == null || rDescription == null)
-        {
-            res.send("Not enough info")
-            return;
-        }
-
-    var itemName = await Account.findOne({ Name : rUsername});
-    var max;
-    max = { $max: '$No' }+ 1;
-        if(itemName == null){
-            
-                    //create new account
-                console.log("create new item");
-
-                var newItem = new Item({
-                    Name : rName,
-                    username : rUsername,
-                    No : max,
-                    Description : rDescription
-                });
-                await newItem.save();
-
-                res.send(newItem);
-                return;
-            
-        }
-        else {
-            res.send("Itemname is already taken")
-        }
-        res.send('Invalid credentials');
-        return;
-        })
 }

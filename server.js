@@ -1,8 +1,10 @@
 require("dotenv").config();
 const express = require('express');
 
+
 const app = express();
 const bodyParser = require('body-parser');
+
 
 app.use(bodyParser.urlencoded({ extended: false}))
 app.use(express.json());
@@ -17,8 +19,11 @@ mongoose.connect(process.env.mongoURI, {useNewUrlParser: true});
 require('./model/Account');
 require('./model/Item');
 
+
+
 //setup routes
 require('./routes/authenticationRoutes')(app);
+require('./routes/itemRoutes')(app);
 
 const port = 13756
 app.listen(port, () => {
