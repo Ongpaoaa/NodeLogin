@@ -6,6 +6,10 @@ const accountSchema = new Schema({
     username: String,
     password: String,
     item: Object,
+    pending: Object,
+    wOof: Object,
+    quest: Object,
+    finishedQ: Object,
     lastAuthentication: {type: Date, default: Date.now}
 });
 
