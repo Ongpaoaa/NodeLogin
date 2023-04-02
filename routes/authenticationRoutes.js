@@ -48,14 +48,20 @@ module.exports = app => {
 
         if(emailAccount == null){
             if(userAccount == null){
-                    //create new account
                 console.log("create new account");
-
+                const foodtype = ["spicy","fried","sweet","bread","meat","vegetable","fruit"];
+                foodtype.sort(() => Math.random() - 0.5);
+                const ffood = [foodtype.shift(),foodtype.shift(),foodtype.shift()];
+                var dfood = [foodtype.pop(),foodtype.pop(),foodtype.pop()];
                 var newAccount = new Account({
                     email : rEmail,
                     username : rUsername,
                     password : rPassword,
-                    item : ({ "Stater": 1}),
+                    item : ({}),
+                    pending: ({}),
+                    wOof: ({hp: 120, favoritef: ffood, dislike: dfood, type: "", en: 5, str: 5, int:5}),
+                    quest: ({}),
+                    finishedQ: ({}),
 
                     lastAuthentication : Date.now()
                 });
@@ -119,4 +125,29 @@ module.exports = app => {
 
         })
 
+
+        app.post('/account/getdata', async (req, res) => {
+            const {rUsername} = req.body;
+            if(rUsername == null  )
+            {
+                res.send("Please input user name")
+                return;
+            } //test
+            var userAccount = await Account.findOne({ username : rUsername});
+            res.send(userAccount)
+            return;
+
+        })
+
+        app.post('/account/sentgift', async (req, res) => {
+            const {rSentedperson, rRecieveperson, rGift} = req.body;
+            if(rSentedperson == null , rRecieveperson == null , rGift == null)
+            {
+                res.send("Not enough info")
+                return;
+            } 
+            var sentedAccount = await Account.findOne({ username : rSentedperson});
+            var recievedAccount = await Account.findOne({ username : rRecieveperson});
+            
+        })
 }
