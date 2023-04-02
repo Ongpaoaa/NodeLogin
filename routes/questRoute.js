@@ -38,7 +38,12 @@ module.exports = app => {
 
   });
 
-  app.post('quest/')
+
+  // app.post(`/quest/${Name}`, async (req,res) => {
+
+  //   var sendQuest = await quest.
+
+  // })
 
 
 
