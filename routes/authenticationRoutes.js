@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Account = mongoose.model('accounts');
-
+const quest = mongoose.model("quests");
 
 module.exports = app => {
 
@@ -60,7 +60,7 @@ module.exports = app => {
                     item : ({}),
                     pending: ({}),
                     wOof: ({hp: 120, favoritef: ffood, dislike: dfood, type: "", en: 5, str: 5, int:5}),
-                    quest: ({}),
+                    quest: ([{Name:"exercise in the morning"}]),
                     finishedQ: ({}),
 
                     lastAuthentication : Date.now()
@@ -150,4 +150,8 @@ module.exports = app => {
             var recievedAccount = await Account.findOne({ username : rRecieveperson});
             
         })
+
+        
+
+    
 }

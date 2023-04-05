@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 const quest = mongoose.model("quests");
+const Account = mongoose.model("accounts");
 
-module.exports = app => {
-
+module.exports = (app) => {
   //create quest
   app.post("/quest/create", async (req, res) => {
     console.log(req.body);
-    const { rName, rObjective, rTag, rLevel, rDescription } = req.body;
+    const { qName, rObjective, rTag, rLevel, rDescription } = req.body;
 
     if (
-      rName == null ||
+      qName == null ||
       rObjective == null ||
       rTag == null ||
       rLevel == null ||
@@ -19,32 +19,42 @@ module.exports = app => {
       return;
     }
 
-    var findQuest = await quest.findOne({Name:rName});
+    var findQuest = await quest.findOne({ qName: qName });
 
     if (findQuest == null) {
-      
       var newQuest = new quest({
-        Name:rName,
-        Objective:rObjective,
-        Tag:rTag,
-        Level:rLevel,
-        Description:rDescription
-      })
-      
+        qName: qName,
+        Objective: rObjective,
+        Tag: rTag,
+        Level: rLevel,
+        Description: rDescription,
+      });
+
       newQuest.save();
 
       res.send(newQuest);
     }
-
   });
 
+  app.post("/quest/give", async (req, res) => {
+    // const questName = await req.body.Name;
 
-  // app.post(`/quest/${Name}`, async (req,res) => {
+    const accountName = await req.body.Name;
+    const questDescription = await quest.findOne(req.body.qName);
+    const questUpdate = Account.findOneAndUpdate(accountName, {
+      $push: { quest: { questDescription } },
+    }, {new:true});
+    
 
-  //   var sendQuest = await quest.
+    console.log(questUpdate);
+    res.send(questDescription);
+  });
 
-  // })
-
-
+  app.get("/quest", async (req, res) => {
+    quest.find((err,quests)=>{
+      if (err) return next(err);
+      res.json(quests);
+    })
+})
 
 };
