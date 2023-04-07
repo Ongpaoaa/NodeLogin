@@ -33,8 +33,6 @@ module.exports = app => {
   });
 
 
-
-
   app.get("/item", async (req, res) => {
       Item.find((err,items)=>{
         if (err) return next(err);

@@ -60,7 +60,7 @@ module.exports = app => {
                     item : ({}),
                     pending: ({}),
                     wOof: ({hp: 120, favoritef: ffood, dislike: dfood, type: "", en: 5, str: 5, int:5}),
-                    quest: ([{Name:"exercise in the morning"}]),
+                    quest: ([]),
                     finishedQ: ({}),
 
                     lastAuthentication : Date.now()
