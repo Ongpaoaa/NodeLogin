@@ -72,6 +72,7 @@ module.exports = app => {
             str: 5,
             int: 5
         },
+        quest:[{}],
         lastAuthentication: Date.now()
         });
     

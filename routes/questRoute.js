@@ -39,7 +39,7 @@ module.exports = (app) => {
     }
   });
 
-  app.put("/quest/give", async (req, res) => {
+  app.post("/quest/give", async (req, res) => {
     const { rUsername } = req.body;
     const { rName } = req.body;
     // const qDescription = await quest.findOne({qName:rName})
@@ -63,11 +63,29 @@ module.exports = (app) => {
       // await qAccount.save();
 
       console.log(qDescription);
-      console.log(qAccount);
+      console.log(qAccount)
       res.send(qAccount);
     } catch (err) {
       // Handle error
       console.error(err);
     }
   });
+
+
+
+  app.get("/quest", async (req, res) => {
+    try {
+      // Retrieve all items from the database
+      const quests = await quest.find();
+
+      // Send a success response with the list of items
+      res.json(quests);
+    } catch (error) {
+      // Handle any errors that occur while fetching items
+      console.error(error);
+      res.status(500).send("Something went wrong while fetching items");
+    }
+  });
+
+
 };
