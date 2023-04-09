@@ -3,6 +3,7 @@ const Item = mongoose.model('items');
 
 module.exports = app => {
 
+  // create item
   app.post("/item/create", async (req, res) => {
     console.log(req.body);
 
@@ -14,9 +15,10 @@ module.exports = app => {
       return;
     } 
     
-
+      // find item name
       var findName = await Item.findOne({Name: rName });
 
+      //check if dont have item create
       if (findName == null) {
 
         var newItem = new Item({
@@ -29,10 +31,11 @@ module.exports = app => {
 
         res.send(newItem);
       }
+      
     
   });
 
-
+  //check all items
   app.get("/item", async (req, res) => {
       Item.find((err,items)=>{
         if (err) return next(err);
