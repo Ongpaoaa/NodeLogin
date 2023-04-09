@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const quest = mongoose.model("quests");
 const Account = mongoose.model("accounts");
-const Item = mongoose.model('items');
+const Item = mongoose.model("items");
 
 module.exports = (app) => {
   //create quest
@@ -25,7 +25,7 @@ module.exports = (app) => {
 
     if (findQuest == null) {
       var newQuest = new quest({
-        _id: "q" +`${qId}`,
+        _id: "q" + `${qId}`,
         qName: qName,
         Objective: rObjective,
         Tag: rTag,
@@ -39,43 +39,35 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/quest/give", async (req, res) => {
+  app.put("/quest/give", async (req, res) => {
+    const { rUsername } = req.body;
+    const { rName } = req.body;
+    // const qDescription = await quest.findOne({qName:rName})
+    // const qAccount = await Account.findOne({username:rUsername})
 
-    //random number function
-    function generateRandomNumbers(count, min, max) {
-      const randomNumbers = [];
-      for (let i = 0; i < count; i++) {
-        const randomNumber = Math.floor(Math.random() * (max - min + 1) + min);
-        randomNumbers.push(randomNumber);
-      }
-      return randomNumbers;
+    try {
+      const qAccount = await Account.findOne({ username: rUsername });
+      const qDescription = await quest.findOne({ qName: rName });
+      await Account.updateOne(
+        { username: rUsername },
+        {
+          $set: {
+            quest: {
+              qDescription
+            },
+          },
+        },
+        { new: true }
+      );
+
+      // await qAccount.save();
+
+      console.log(qDescription);
+      console.log(qAccount);
+      res.send(qAccount);
+    } catch (err) {
+      // Handle error
+      console.error(err);
     }
-    
-    
-    const {rUsername} = req.body;
-    const {rName} = req.body;
-    
-    // get quest description
-    // get username
-    const qAccount = await Account.findOne({username:rUsername})
-    const qDescription = await quest.findOne({qName:rName}) 
-    console.log(qDescription)
-    // get account quest length
-    // size to add to account.quest
-    const qLength = qAccount.quest.length;
-    const size = 3 - qLength;
-    
-    console.log(qLength + "length"); 
-    console.log(size + "size")
-    const quest_Id_Num = generateRandomNumbers(size,1,100);
-
-    await qAccount.quest.push({qDescription})
-    await qAccount.save()
-
-
-    res.send(qAccount);
-    console.log(quest_Id_Num);
-
-
   });
-}
+};

@@ -5,7 +5,6 @@ const quest = mongoose.model("quests");
 module.exports = app => {
 
 //Routes
-
     app.post('/account/login', async (req, res) => {
 
         const { rUsername, rPassword} = req.body;
@@ -60,7 +59,14 @@ module.exports = app => {
                     item : ({}),
                     pending: ({}),
                     wOof: ({hp: 120, favoritef: ffood, dislike: dfood, type: "", en: 5, str: 5, int:5}),
-                    quest: ([]),
+                    quest: ([{
+                        _id: '8',
+                        qName: 'training',
+                        Objective: 'crawl for 15 km',
+                        Tag: 'sheesh',
+                        Level: 1,
+                        Description: 'rcrawl for 15 km',
+                    }]),
                     finishedQ: ({}),
 
                     lastAuthentication : Date.now()
