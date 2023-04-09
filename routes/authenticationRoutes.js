@@ -89,14 +89,12 @@ module.exports = app => {
         } //test
         var userAccount = await Account.findOne({ username : rUsername});
         var dulp = parseInt(userAccount.item[rItemName]);
-        console.log(dulp);
         var Names = 'item.'+rItemName;
-        var obj = {};
-            obj[Names] = 1;
-        var obj2 = {};
-            obj2[Names] = dulp+1;
-        if (dulp == null)
+
+        if (isNaN(dulp) == true)
         {
+            var obj = {};
+                obj[Names] = 1;
             const ress = await Account.updateOne(
                 {username : rUsername}, 
                 {$set: obj});
@@ -104,11 +102,13 @@ module.exports = app => {
         }
         else
         {
+            var obj2 = {};
+                obj2[Names] = dulp+1;
             dulp += 1;
             const ress = await Account.updateOne(
                 {username : rUsername}, 
                 {$set: obj2});
-            res.send("complete2");
+            res.send(obj2);
         }
         
         // if(userAccount == null)
@@ -148,10 +148,38 @@ module.exports = app => {
             } 
             var sentedAccount = await Account.findOne({ username : rSentedperson});
             var recievedAccount = await Account.findOne({ username : rRecieveperson});
-            
-        })
+            var dulp = parseInt(recievedAccount.item[rGift]);
+            var dulp2 = parseInt(sentedAccount.item[rGift]);
+            var Names = 'item.'+rGift;
+            var obj2 = {};
+                obj2[Names] = dulp2 -= 1;
+            const ress = await Account.updateOne(
+                {username : rSentedperson}, 
+                {$set: obj2});
+            console.log(Names);
+            if (isNaN(dulp) == true)
+            {
+                var Names = 'pending.'+ rGift;
+                var obj = {};
+                    obj[Names] = rSentedperson;
+                const ress = await Account.updateOne(
+                    {username : rRecieveperson}, 
+                    {$set: obj});
+                res.send("complete1");
+            }
+            else
+            {
+                var Names = 'pending.'+rGift;
+                var obj2 = {};
+                    obj[Names] = rSentedperson;
+                dulp += 1;
+                const ress = await Account.updateOne(
+                    {username : rRecieveperson}, 
+                    {$set: obj2});
+                res.send(obj2);
+            }
 
-        
+        })
 
     
 }
