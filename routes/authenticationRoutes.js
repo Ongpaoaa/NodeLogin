@@ -118,7 +118,7 @@ module.exports = app => {
 
 
         // This route allows clients to retrieve user data based on a provided username
-    app.post('/account/getdata', async (req, res) => {
+    app.get('/account/getdata', async (req, res) => {
         const {rUsername} = req.body; // Retrieve the username from the request body
         
         // Check if the username is null or undefined
