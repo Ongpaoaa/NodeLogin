@@ -72,6 +72,7 @@ module.exports = app => {
             str: 5,
             int: 5
         },
+        item:{},
         quest:[{}],
         lastAuthentication: Date.now()
         });
@@ -83,45 +84,45 @@ module.exports = app => {
         res.send(newAccount);
     });
 
-            // Create a POST route for giving an item to a user
     app.post('/account/give', async (req, res) => {
-        const { rUsername, rItemName } = req.body; // Get the username and item name from the request body
-
-        // Check if either the username or the item name are not provided
+        const { rUsername, rItemName } = req.body;
+    
         if (!rUsername || !rItemName) {
-            res.send("Not enough info"); // Send a response indicating that there isn't enough info to complete the request
+            res.send("Not enough info");
             return;
         }
-
-        // Find the user's account in the database using their username
+    
         const userAccount = await Account.findOne({ username: rUsername });
-
-        // Get the current amount of the given item the user has (if they have any)
-        const itemAmount = parseInt(userAccount.item[rItemName] || 0);
-
-        // Construct the query to update the item amount by incrementing it by 1
+        let itemAmount = 0;
+        if (userAccount.item.hasOwnProperty(rItemName)) {
+            itemAmount = parseInt(userAccount.item[rItemName]);
+            console.log(parseInt(userAccount.item[rItemName]));
+             
+          } else {
+            itemAmount = 0;
+          }
         const Names = 'item.' + rItemName;
+    
         const updateQuery = {
             $set: { [Names]: itemAmount + 1 }
         };
-
-        // Update the user's account in the database with the new item amount
+    
         const updateResult = await Account.updateOne({ username: rUsername }, updateQuery);
-
-        // Check if the update was successful
+    
         if (updateResult.nModified === 0) {
-            res.send("Failed to update item amount"); // Send a response indicating that the update failed
+            res.send("Failed to update item amount");
         } else {
-            res.send(updateQuery.$set); // Send a response indicating the new item amount
+            res.send(updateQuery.$set);
         }
     });
+              
 
 
 
         // This route allows clients to retrieve user data based on a provided username
-    app.get('/account/getdata', async (req, res) => {
+    app.post('/account/getdata', async (req, res) => {
         const {rUsername} = req.body; // Retrieve the username from the request body
-        
+        console.log(rUsername)
         // Check if the username is null or undefined
         if (rUsername == null) {
             res.send("Please input user name"); // If so, send a response with an error message and return
@@ -130,7 +131,7 @@ module.exports = app => {
         
         // Query the database for an Account document that has the specified username
         var userAccount = await Account.findOne({ username : rUsername});
-        
+        console.log(userAccount)
         res.send(userAccount); // Send the user data as a response
         return;
     })

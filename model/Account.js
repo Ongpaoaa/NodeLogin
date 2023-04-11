@@ -8,7 +8,7 @@ const accountSchema = new Schema({
     item: Object,
     pending: Object,
     wOof: Object,
-    quest: Object,
+    quest: Array,
     finishedQ: Object,
     lastAuthentication: {type: Date, default: Date.now}
 });
