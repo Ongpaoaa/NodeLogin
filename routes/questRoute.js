@@ -47,32 +47,37 @@ module.exports = (app) => {
 
     try {
       const qAccount = await Account.findOne({ username: rUsername });
-      const qDescription = await quest.findOne({ qName: rName });
-      await Account.updateOne(
-        { username: rUsername },
-        {
-          $set: {
-            quest: {
-              qDescription
+      const questAmount = qAccount.quest.length;
+      if (questAmount < 3){
+        await Account.updateOne(
+          { username: rUsername },
+          {
+            $push: {
+              quest: {
+                rName,
+                progress: 0
+              },
             },
           },
-        },
-        { new: true }
-      );
-
-      // await qAccount.save();
-
-      console.log(qDescription);
-      console.log(qAccount)
-      res.send(qAccount);
+          { new: true }
+        );
+        res.send(qAccount);
+      }
+      else{
+        res.send("already have 3 quest");
+      }
+      
     } catch (err) {
       // Handle error
       console.error(err);
     }
   });
 
-
-
+  app.post("/quest/update", async (req, res) => {
+    const { rUsername } = req.body;
+    const { rQuestno } = req.body;
+    
+  });
   app.get("/quest", async (req, res) => {
     try {
       // Retrieve all items from the database
