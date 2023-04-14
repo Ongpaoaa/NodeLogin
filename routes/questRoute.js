@@ -76,8 +76,23 @@ module.exports = (app) => {
   app.post("/quest/update", async (req, res) => {
     const { rUsername } = req.body;
     const { rQuestno } = req.body;
-    
+    try {
+      const qAccount = await Account.findOne({ username: rUsername });
+      const objects = "quest." + String(rQuestno) +  ".progress";
+      let progress = qAccount.quest[rQuestno].progress + 1;
+      await Account.updateOne(
+        { "username": rUsername },
+        { "$set": { [objects]: progress } }
+      )
+      res.send(qAccount);
+  
+    } catch (err) {
+      // Handle error
+      console.error(err);
+    }
   });
+
+
   app.get("/quest", async (req, res) => {
     try {
       // Retrieve all items from the database
