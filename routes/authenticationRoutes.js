@@ -41,10 +41,11 @@ module.exports = (app) => {
     // Check if there is already an account with the same username or email
     const userAccount = await Account.findOne({ username: rUsername });
     const emailAccount = await Account.findOne({ email: rEmail });
-
+    console.log(emailAccount);
+    console.log(userAccount)
     // If there is already an account with the same email, send an error response
     if (emailAccount) {
-      res.send("Email is already taken");
+      res.send("Email or Username is already taken ");
       return;
     }
 
@@ -77,14 +78,14 @@ module.exports = (app) => {
       username: rUsername,
       password: rPassword,
       wOof: {
-        hp: 120,
         favoritef: favoriteFoods,
         dislike: dislikedFoods,
         type: "",
         stat: {
           CP: 0,
-          HP: 0,
+          EN: 0,
           MP: 0,
+          hp: 0
         },
         item: { rock: 1 },
         quest: [{}],
@@ -208,13 +209,27 @@ module.exports = (app) => {
   });
 
   app.post("/account/upstat", async (req, res) => {
-    const { rUsername, value } = req.body;
+    const { rUsername, value, stat } = req.body;
     try {
-      const acc = await Account.findOne({ username: rUsername });
-      acc.wOof.hp = parseInt(value); // Set the new value of "hp"
-      await acc.save(); // Save the updated document to the database
-      console.log(acc);
-      res.send(acc);
+      const filter = { username: rUsername };
+      const acc = await Account.findOneAndUpdate(filter);
+      const update = {
+        $set: {
+          "wOof.stat": {
+            ...acc.wOof.stat, // Keep the old values of wOof.stat
+            [stat]: parseInt(value), // Set the new value for the specified stat
+          },  
+        },
+      };
+      const options = { new: true }; // Return the updated document
+      const updatedAcc = await Account.findOneAndUpdate(
+        filter,
+        update,
+        options
+      );
+
+      console.log(updatedAcc);
+      res.send(updatedAcc);
     } catch (err) {
       console.log(err);
       res.status(500).send("Internal server error.");
