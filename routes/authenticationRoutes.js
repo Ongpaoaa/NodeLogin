@@ -86,66 +86,65 @@ module.exports = (app) => {
           HP: 0,
           MP: 0,
         },
-        item:{rock: 1},
-        quest:[{}],
-        lastAuthentication: Date.now()
-        });
-    
-        // Save the new account to the database
-        await newAccount.save();
-    
-        // Send a success response with the new account object
-        res.send(newAccount);
+        item: { rock: 1 },
+        quest: [{}],
+        lastAuthentication: Date.now(),
+      },
     });
 
-    app.post('/account/give', async (req, res) => {
-        const { rUsername, rItemName } = req.body;
-    
-        if (!rUsername || !rItemName) {
-            res.send("Not enough info");
-            return;
-        }
-    
-        const userAccount = await Account.findOne({ username: rUsername });
-        let itemAmount = 0;
-        if (userAccount.item.hasOwnProperty(rItemName)) {
-            itemAmount = parseInt(userAccount.item[rItemName]);
-            console.log(parseInt(userAccount.item[rItemName]));
-             
-          } else {
-            itemAmount = 0;
-          }
-        const Names = 'item.' + rItemName;
-    
-        const updateQuery = {
-            $set: { [Names]: itemAmount + 1 }
-        };
-    
-        const updateResult = await Account.updateOne({ username: rUsername }, updateQuery);
-    
-        if (updateResult.nModified === 0) {
-            res.send("Failed to update item amount");
-        } else {
-            res.send(updateQuery.$set);
-        }
-    });
-              
+    // Save the new account to the database
+    await newAccount.save();
 
+    // Send a success response with the new account object
+    res.send(newAccount);
+  });
 
+  app.post("/account/give", async (req, res) => {
+    const { rUsername, rItemName } = req.body;
 
-        // This route allows clients to retrieve user data based on a provided username
-    app.get('/account/getdata/:username', async (req, res) => {
-        var rusername = req.params.username; // Retrieve the username from the request body
-        console.log(rusername)
-        // Check if the username is null or undefined
-        
-        // Query the database for an Account document that has the specified username
-        var userAccount = await Account.findOne({ username : rusername});
-        console.log(userAccount)
-        res.send(userAccount); // Send the user data as a response
-        return;
-    })
+    if (!rUsername || !rItemName) {
+      res.send("Not enough info");
+      return;
+    }
 
+    const userAccount = await Account.findOne({ username: rUsername });
+    let itemAmount = 0;
+    if (userAccount.item.hasOwnProperty(rItemName)) {
+      itemAmount = parseInt(userAccount.item[rItemName]);
+      console.log(parseInt(userAccount.item[rItemName]));
+    } else {
+      itemAmount = 0;
+    }
+    const Names = "item." + rItemName;
+
+    const updateQuery = {
+      $set: { [Names]: itemAmount + 1 },
+    };
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update item amount");
+    } else {
+      res.send(updateQuery.$set);
+    }
+  });
+
+  // This route allows clients to retrieve user data based on a provided username
+  app.get("/account/getdata/:username", async (req, res) => {
+    var rusername = req.params.username; // Retrieve the username from the request body
+    console.log(rusername);
+    // Check if the username is null or undefined
+
+    // Query the database for an Account document that has the specified username
+    var userAccount = await Account.findOne({ username: rusername });
+    console.log(userAccount);
+    res.send(userAccount); // Send the user data as a response
+    return;
+  });
 
   // Handle HTTP POST requests to the "/account/sentgift" route
   app.post("/account/sentgift", async (req, res) => {
@@ -208,24 +207,27 @@ module.exports = (app) => {
     }
   });
 
-  app.put("/account/upstat", async (req, res) => {
-    const { rUsername, rCP, rHP, rMP } = req.body;
-    
-    
-    // var hp = wOof.stat
-    // hp = newHP
-    // var cp = wOof.stat
-    // mp = newMP
-    // var mp = wOof.stat
-    // cp = newCP
-    // console.log(hp,mp,cp)
-    const wOof = Account.findOne({})
-    console.log(wOof)
-    console.log(rUsername, rCP, rHP, rMP);
+  app.post("/account/upstat", async (req, res) => {
+    const { rUsername, rCP, rHP, rMP, stat } = req.body;
 
-    // await Account.updateOne({username:rUsername},{$set:{WOof:wOof}}{
-   
-    //     }
-    // });
+    const setStat = {rCP, rHP, rMP}
+    // console.log("username : " + rUsername);
+    // console.log("CP: " + rCP);
+    // console.log("HP: " + rHP);
+    // console.log("MP: " + rMP);
+
+
+
+    try{
+      const acc = await Account.findOne({ username: rUsername });
+      console.log(acc.wOof.stat)
+      await acc.updateOne(
+        { "username": rUsername },
+        { "$set": {"wOof.hp":50} });
+        res.send(acc)
+      
+    } catch (err){
+      console.log(err)
+    } 
   });
 };

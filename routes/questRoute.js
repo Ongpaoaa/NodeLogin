@@ -80,7 +80,7 @@ module.exports = (app) => {
       const qAccount = await Account.findOne({ username: rUsername });
       const objects = "quest." + String(rQuestno) +  ".progress";
       let progress = qAccount.quest[rQuestno].progress + 1;
-      await Account.updateOne(
+      await qAccount.updateOne(
         { "username": rUsername },
         { "$set": { [objects]: progress } }
       )
