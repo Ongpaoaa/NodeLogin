@@ -208,26 +208,16 @@ module.exports = (app) => {
   });
 
   app.post("/account/upstat", async (req, res) => {
-    const { rUsername, rCP, rHP, rMP, stat } = req.body;
-
-    const setStat = {rCP, rHP, rMP}
-    // console.log("username : " + rUsername);
-    // console.log("CP: " + rCP);
-    // console.log("HP: " + rHP);
-    // console.log("MP: " + rMP);
-
-
-
-    try{
+    const { rUsername, value } = req.body;
+    try {
       const acc = await Account.findOne({ username: rUsername });
-      console.log(acc.wOof.stat)
-      await acc.updateOne(
-        { "username": rUsername },
-        { "$set": {"wOof.hp":50} });
-        res.send(acc)
-      
-    } catch (err){
-      console.log(err)
-    } 
+      acc.wOof.hp = parseInt(value); // Set the new value of "hp"
+      await acc.save(); // Save the updated document to the database
+      console.log(acc);
+      res.send(acc);
+    } catch (err) {
+      console.log(err);
+      res.status(500).send("Internal server error.");
+    }
   });
 };
