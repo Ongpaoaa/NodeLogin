@@ -87,11 +87,11 @@ module.exports = (app) => {
           MP: 0,
           hp: 0
         },
+      },
         item: { rock: 1 },
         quest: [{}],
         lastAuthentication: Date.now(),
-      },
-    });
+      });
 
     // Save the new account to the database
     await newAccount.save();
