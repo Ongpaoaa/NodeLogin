@@ -7,7 +7,7 @@ module.exports = (app) => {
   //create quest
   app.post("/quest/create", async (req, res) => {
     console.log(req.body);
-    const { qId, qName, rObjective, rTag, rLevel, rDescription } = req.body;
+    const { qId, qName, rObjective, rTag, rLevel, rDescription , rMaxprogress} = req.body;
 
     if (
       qId == null ||
@@ -15,7 +15,8 @@ module.exports = (app) => {
       rObjective == null ||
       rTag == null ||
       rLevel == null ||
-      rDescription == null
+      rDescription == null ||
+      rMaxprogress == null
     ) {
       res.send("Not enough info");
       return;
@@ -31,8 +32,9 @@ module.exports = (app) => {
         Tag: rTag,
         Level: rLevel,
         Description: rDescription,
+        Maxprogress: parseInt(rMaxprogress)
       });
-
+      console.log(parseInt(rMaxprogress))
       newQuest.save();
 
       res.send(newQuest);
@@ -81,9 +83,9 @@ module.exports = (app) => {
       const objects = "quest." + String(rQuestno) +  ".progress";
       let progress = qAccount.quest[rQuestno].progress + 1;
       await qAccount.updateOne(
-        { "username": rUsername },
         { "$set": { [objects]: progress } }
       )
+      console.log([objects], progress);
       res.send(qAccount);
   
     } catch (err) {

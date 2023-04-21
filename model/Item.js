@@ -6,6 +6,8 @@ const itemSchema = new Schema({
     No: Number,
     Rarity: Number,
     Description: String,
+    Type: String,
+    Tag: String,
     Date: {type: Date, default: Date.now}
 });
 

@@ -7,7 +7,8 @@ const questSchema = new Schema({
     Objective:String,
     Tag:String,
     Level:Number,
-    Description:String
+    Description:String,
+    Maxprogress:Number
 });
 
 mongoose.model("quests",questSchema);

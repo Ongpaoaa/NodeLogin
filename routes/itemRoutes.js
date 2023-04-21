@@ -4,10 +4,10 @@ const Item = mongoose.model('items');
 module.exports = (app) => {
   // Create a new item
   app.post("/item/create", async (req, res) => {
-    const { rName, rRarity, rDescription } = req.body;
+    const { rName, rRarity, rDescription, rType , rTag } = req.body;
 
     // Check if all required fields are present in the request body
-    if (!rName || !rRarity || !rDescription) {
+    if (!rName || !rRarity || !rDescription || !rType || !rTag ) {
       return res.status(400).send("Not enough information provided");
     }
 
@@ -24,6 +24,8 @@ module.exports = (app) => {
         Name: rName,
         Rarity: rRarity,
         Description: rDescription,
+        Type : rType,
+        Tag : rTag
       });
 
       // Save the new item to the database
