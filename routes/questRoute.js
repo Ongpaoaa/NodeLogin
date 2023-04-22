@@ -7,7 +7,8 @@ module.exports = (app) => {
   //create quest
   app.post("/quest/create", async (req, res) => {
     console.log(req.body);
-    const { qId, qName, rObjective, rTag, rLevel, rDescription , rMaxprogress} = req.body;
+    const { qId, qName, rObjective, rTag, rLevel, rDescription, rMaxprogress } =
+      req.body;
 
     if (
       qId == null ||
@@ -32,9 +33,9 @@ module.exports = (app) => {
         Tag: rTag,
         Level: rLevel,
         Description: rDescription,
-        Maxprogress: parseInt(rMaxprogress)
+        Maxprogress: parseInt(rMaxprogress),
       });
-      console.log(parseInt(rMaxprogress))
+      console.log(parseInt(rMaxprogress));
       newQuest.save();
 
       res.send(newQuest);
@@ -50,25 +51,23 @@ module.exports = (app) => {
     try {
       const qAccount = await Account.findOne({ username: rUsername });
       const questAmount = qAccount.quest.length;
-      if (questAmount < 3){
+      if (questAmount < 3) {
         await Account.updateOne(
           { username: rUsername },
           {
             $push: {
               quest: {
                 rName,
-                progress: 0
+                progress: 0,
               },
             },
           },
           { new: true }
         );
         res.send(qAccount);
-      }
-      else{
+      } else {
         res.send("already have 3 quest");
       }
-      
     } catch (err) {
       // Handle error
       console.error(err);
@@ -80,20 +79,19 @@ module.exports = (app) => {
     const { rQuestno } = req.body;
     try {
       const qAccount = await Account.findOne({ username: rUsername });
-      const objects = "quest." + String(rQuestno) +  ".progress";
+      const objects = "quest." + String(rQuestno) + ".progress";
       let progress = qAccount.quest[rQuestno].progress + 1;
       await qAccount.updateOne(
-        { "$set": { [objects]: progress } }
-      )
+        { username: rUsername },
+        { $set: { [objects]: progress } }
+      );
       console.log([objects], progress);
       res.send(qAccount);
-  
     } catch (err) {
       // Handle error
       console.error(err);
     }
   });
-
 
   app.get("/quest", async (req, res) => {
     try {
@@ -109,5 +107,47 @@ module.exports = (app) => {
     }
   });
 
+  app.get("/quest/one", async (req, res) => {
+    const { rName } = req.body;
 
+    try {
+      // Retrieve all items from the database
+      const quests = await quest.findOne({ qName: rName });
+      console.log(quests);
+      // Send a success response with the list of items
+      res.json(quests);
+    } catch (error) {
+      // Handle any errors that occur while fetching items
+      console.error(error);
+      res.status(500).send("Something went wrong while fetching items");
+    }
+  });
+
+  app.post("/quest/clearquest", async (req, res) => {
+    const { rUsername } = req.body;
+    const { rQuestno } = req.body;
+
+    try {
+      const qAccount = await Account.findOne({ username: rUsername });
+
+      if (!qAccount) {
+        return res.status(404).send({ error: `Account not found for username: ${rUsername}` });
+      }
+
+      const quest = qAccount.quest;
+      if (rQuestno >= quest.length) {
+        return res.status(400).send({ error: `Invalid quest index: ${rQuestno}` });
+      }
+
+      quest[rQuestno] = {}; // Set the object at the specified index to an empty object
+      await qAccount.save();
+
+      res.send(qAccount);
+
+    } catch (err) {
+      // Handle error
+      console.error(err);
+      res.status(500).send({ error: 'Server error' });
+    }
+  });
 };
