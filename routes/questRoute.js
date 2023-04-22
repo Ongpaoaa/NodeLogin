@@ -79,14 +79,14 @@ module.exports = (app) => {
     const { rQuestno } = req.body;
     try {
       const qAccount = await Account.findOne({ username: rUsername });
-      const objects = "quest." + String(rQuestno) + ".progress";
+      const objects = "quest." + String(rQuestno) +  ".progress";
       let progress = qAccount.quest[rQuestno].progress + 1;
       await qAccount.updateOne(
-        { username: rUsername },
-        { $set: { [objects]: progress } }
-      );
+        { "$set": { [objects]: progress } }
+      )
       console.log([objects], progress);
       res.send(qAccount);
+  
     } catch (err) {
       // Handle error
       console.error(err);
