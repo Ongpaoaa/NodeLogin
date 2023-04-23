@@ -235,4 +235,30 @@ module.exports = (app) => {
       res.status(500).send("Internal server error.");
     }
   });
+
+  app.delete("/account/deleteitem", async (req, res) => {
+    const { username } = req.body;
+    try {
+      // Find the document based on the username
+      const qAccount = await Account.findOne({ username });
+  
+      // Check if the document exists
+      if (!qAccount) {
+        return res.status(404).send({ error: "User not found" });
+      }
+  
+      // Delete the "rock" field from the "item" object
+      delete qAccount.item.rock;
+  
+      // Save the updated document
+      await qAccount.save();
+  
+      console.log(qAccount);
+      res.send(qAccount);
+    } catch (err) {
+      // Handle error
+      console.error(err);
+      res.status(500).send({ error: "Server error" });
+    }
+  });
 };
