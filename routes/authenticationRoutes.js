@@ -42,7 +42,7 @@ module.exports = (app) => {
     const userAccount = await Account.findOne({ username: rUsername });
     const emailAccount = await Account.findOne({ email: rEmail });
     console.log(emailAccount);
-    console.log(userAccount)
+    console.log(userAccount);
     // If there is already an account with the same email, send an error response
     if (emailAccount) {
       res.send("Email or Username is already taken ");
@@ -85,13 +85,13 @@ module.exports = (app) => {
           CP: 0,
           EN: 0,
           MP: 0,
-          hp: 0
+          hp: 0,
         },
       },
-        item: { rock: 1 },
-        quest: [{}],
-        lastAuthentication: Date.now(),
-      });
+      item: { rock: 1, gun: 3 },
+      quest: [{}],
+      lastAuthentication: Date.now(),
+    });
 
     // Save the new account to the database
     await newAccount.save();
@@ -218,7 +218,7 @@ module.exports = (app) => {
           "wOof.stat": {
             ...acc.wOof.stat, // Keep the old values of wOof.stat
             [stat]: parseInt(value), // Set the new value for the specified stat
-          },  
+          },
         },
       };
       const options = { new: true }; // Return the updated document
@@ -236,29 +236,44 @@ module.exports = (app) => {
     }
   });
 
-  app.delete("/account/deleteitem", async (req, res) => {
-    const { username } = req.body;
+  app.post("/account/deleteitem", async (req, res) => {
+    const { rUsername, rItemName } = req.body;
+
+    if (!rUsername || !rItemName) {
+      res.send("Not enough info");
+      return;
+    }
+
+    const userAccount = await Account.findOne({ username: rUsername });
+
+    if (userAccount.item.hasOwnProperty(rItemName)) {
+      itemAmount = parseInt(userAccount.item[rItemName]);
+      console.log(parseInt(userAccount.item[rItemName]));
+    } else {
+    }
+    const Names = "item." + rItemName;
+
     try {
-      // Find the document based on the username
-      const qAccount = await Account.findOne({ username });
-  
-      // Check if the document exists
-      if (!qAccount) {
-        return res.status(404).send({ error: "User not found" });
+      if (userAccount.item[rItemName]==0){
+        delete userAccount.item[rItemName]
       }
-  
-      // Delete the "rock" field from the "item" object
-      delete qAccount.item.rock;
-  
-      // Save the updated document
-      await qAccount.save();
-  
-      console.log(qAccount);
-      res.send(qAccount);
     } catch (err) {
-      // Handle error
-      console.error(err);
-      res.status(500).send({ error: "Server error" });
+      console.log(err);
+    }
+
+    const updateQuery = {
+      $set: { [Names]: userAccount.item[rItemName] - 400},
+    };
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update item amount");
+    } else {
+      res.send(updateQuery.$set);
     }
   });
 };
