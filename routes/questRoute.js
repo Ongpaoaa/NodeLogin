@@ -139,7 +139,7 @@ module.exports = (app) => {
         return res.status(400).send({ error: `Invalid quest index: ${rQuestno}` });
       }
 
-      quest[rQuestno] = {}; // Set the object at the specified index to an empty object
+      delete quest[rQuestno]; // Set the object at the specified index to an empty object
       await qAccount.save();
 
       res.send(qAccount);
