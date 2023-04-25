@@ -248,22 +248,26 @@ module.exports = (app) => {
 
     if (userAccount.item.hasOwnProperty(rItemName)) {
       itemAmount = parseInt(userAccount.item[rItemName]);
+      if(itemAmount == 1){
+        userAccount.item[rItemName] = undefined;
+      }
       console.log(parseInt(userAccount.item[rItemName]));
     } else {
     }
     const Names = "item." + rItemName;
-
-    try {
-      if (userAccount.item[rItemName]==0){
-        delete userAccount.item[rItemName]
-      }
-    } catch (err) {
-      console.log(err);
+    
+    if (userAccount.item[rItemName] > 1){
+      userAccount.item[rItemName] -= 1;
+    }
+    else if (userAccount.item[rItemName] == 1){
+      db.item.update({},{$unset: {[Names] : userAccount.item[rItemName] }});
     }
 
     const updateQuery = {
-      $set: { [Names]: userAccount.item[rItemName] - 400},
+      $set: { [Names]: userAccount.item[rItemName]},
+      
     };
+    console.log(userAccount.item[rItemName]);
 
     const updateResult = await Account.updateOne(
       { username: rUsername },
