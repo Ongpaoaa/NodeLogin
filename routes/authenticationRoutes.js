@@ -30,10 +30,10 @@ module.exports = (app) => {
   // This route is used to create a new account
   app.post("/account/create", async (req, res) => {
     // Extract the email, username, and password from the request body
-    const { rEmail, rUsername, rPassword } = req.body;
+    const { rEmail, rUsername, rPassword, rFyncId } = req.body;
 
     // If any of the required fields are missing, send an error response
-    if (!rEmail || !rUsername || !rPassword) {
+    if (!rEmail || !rUsername || !rPassword || !rFyncId) {
       res.send("Invalid credentials");
       return;
     }
@@ -77,6 +77,7 @@ module.exports = (app) => {
       email: rEmail,
       username: rUsername,
       password: rPassword,
+      rFyncId: fyncid,
       wOof: {
         favoritef: favoriteFoods,
         dislike: dislikedFoods,
@@ -236,7 +237,7 @@ module.exports = (app) => {
     }
   });
 
-  app.delete("/account/deleteitem", async (req, res) => {
+  app.post("/account/deleteitem", async (req, res) => {
     const { username } = req.body;
     try {
       // Find the document based on the username
@@ -248,7 +249,7 @@ module.exports = (app) => {
       }
   
       // Delete the "rock" field from the "item" object
-      delete qAccount.item.rock;
+      delete qAccount.item[0];
   
       // Save the updated document
       await qAccount.save();
