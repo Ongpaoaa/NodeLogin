@@ -42,7 +42,7 @@ module.exports = (app) => {
     const userAccount = await Account.findOne({ username: rUsername });
     const emailAccount = await Account.findOne({ email: rEmail });
     console.log(emailAccount);
-    console.log(userAccount)
+    console.log(userAccount);
     // If there is already an account with the same email, send an error response
     if (emailAccount) {
       res.send("Email or Username is already taken ");
@@ -86,13 +86,13 @@ module.exports = (app) => {
           CP: 0,
           EN: 0,
           MP: 0,
-          hp: 0
+          hp: 0,
         },
       },
-        item: { rock: 1 },
-        quest: [{}],
-        lastAuthentication: Date.now(),
-      });
+      item: { rock: 1, gun: 3 },
+      quest: [{}],
+      lastAuthentication: Date.now(),
+    });
 
     // Save the new account to the database
     await newAccount.save();
@@ -219,7 +219,7 @@ module.exports = (app) => {
           "wOof.stat": {
             ...acc.wOof.stat, // Keep the old values of wOof.stat
             [stat]: parseInt(value), // Set the new value for the specified stat
-          },  
+          },
         },
       };
       const options = { new: true }; // Return the updated document
@@ -237,29 +237,5 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/account/deleteitem", async (req, res) => {
-    const { username } = req.body;
-    try {
-      // Find the document based on the username
-      const qAccount = await Account.findOne({ username });
   
-      // Check if the document exists
-      if (!qAccount) {
-        return res.status(404).send({ error: "User not found" });
-      }
-  
-      // Delete the "rock" field from the "item" object
-      delete qAccount.item[0];
-  
-      // Save the updated document
-      await qAccount.save();
-  
-      console.log(qAccount);
-      res.send(qAccount);
-    } catch (err) {
-      // Handle error
-      console.error(err);
-      res.status(500).send({ error: "Server error" });
-    }
-  });
 };
