@@ -124,30 +124,55 @@ module.exports = (app) => {
   });
 
   app.post("/quest/clearquest", async (req, res) => {
-    const { rUsername } = req.body;
-    const { rQuestno } = req.body;
+  const { rUsername, rQuestno } = req.body;
 
-    try {
-      const qAccount = await Account.findOne({ username: rUsername });
+  if (!rUsername || rQuestno === undefined) {
+    res.send("Not enough info");
+    return;
+  }
 
-      if (!qAccount) {
-        return res.status(404).send({ error: `Account not found for username: ${rUsername}` });
-      }
+  try {
+    const userAccount = await Account.findOne({ username: rUsername });
 
-      const quest = qAccount.quest;
-      if (rQuestno >= quest.length) {
-        return res.status(400).send({ error: `Invalid quest index: ${rQuestno}` });
-      }
-
-      quest[rQuestno] = {}; // Set the object at the specified index to an empty object
-      await qAccount.save();
-
-      res.send(qAccount);
-
-    } catch (err) {
-      // Handle error
-      console.error(err);
-      res.status(500).send({ error: 'Server error' });
+    if (!userAccount) {
+      res.send(`Account not found for username: ${rUsername}`);
+      return;
     }
-  });
+
+    const questArray = userAccount.quest;
+
+    if (rQuestno >= questArray.length || rQuestno < 0) {
+      res.send(`Invalid quest index: ${rQuestno}`);
+      return;
+    }
+
+    // unset the entire object at the specified index
+    questArray[rQuestno] = undefined;
+
+    // remove the undefined elements from the questArray
+    const filteredQuestArray = questArray.filter((quest) => quest !== undefined);
+
+    // update the user account with the filtered quest array
+    const updateQuery = {
+      $set: {
+        quest: filteredQuestArray,
+      },
+    };
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update quest");
+    } else {
+      res.send(updateQuery.$set);
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Server error" });
+  }
+});
+
 };
