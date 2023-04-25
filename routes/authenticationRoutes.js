@@ -254,12 +254,11 @@ module.exports = (app) => {
     }
     const Names = "item." + rItemName;
 
-    try {
-      if (userAccount.item[rItemName]==0){
-        delete userAccount.item[rItemName]
-      }
-    } catch (err) {
-      console.log(err);
+    if (userAccount.item[rItemName] > 1){
+      userAccount.item[rItemName] -= 1;
+    }
+    else if (userAccount.item[rItemName] == 1){
+      db.item.update({},{$unset: {[Names] : userAccount.item[rItemName] }});
     }
 
     const updateQuery = {
