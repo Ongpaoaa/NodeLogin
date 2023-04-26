@@ -261,19 +261,5 @@ module.exports = (app) => {
       db.item.update({},{$unset: {[Names] : userAccount.item[rItemName] }});
     }
 
-    const updateQuery = {
-      $set: { [Names]: userAccount.item[rItemName] - 400},
-    };
-
-    const updateResult = await Account.updateOne(
-      { username: rUsername },
-      updateQuery
-    );
-
-    if (updateResult.nModified === 0) {
-      res.send("Failed to update item amount");
-    } else {
-      res.send(updateQuery.$set);
-    }
-  });
+    res.send("complete");
 };
