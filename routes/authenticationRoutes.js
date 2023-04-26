@@ -255,12 +255,12 @@ module.exports = (app) => {
     const Names = "item." + rItemName;
     
     if (itemAmount > 1){
-      updateQuery = { $set: { [Names]: itemAmount}};
+      updateQuery = { $set: { [Names]: itemAmount - 1}};
     }
     else if (itemAmount == 1){
       updateQuery = {$unset: {[Names] : itemAmount }};
     }
-    
+
     const updateResult = await Account.updateOne(
       { username: rUsername },
       updateQuery
