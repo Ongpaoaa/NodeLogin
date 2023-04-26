@@ -30,10 +30,10 @@ module.exports = (app) => {
   // This route is used to create a new account
   app.post("/account/create", async (req, res) => {
     // Extract the email, username, and password from the request body
-    const { rEmail, rUsername, rPassword, rFyncId } = req.body;
+    const { rEmail, rUsername, rPassword } = req.body;
 
     // If any of the required fields are missing, send an error response
-    if (!rEmail || !rUsername || !rPassword || !rFyncId) {
+    if (!rEmail || !rUsername || !rPassword ) {
       res.send("Invalid credentials");
       return;
     }
@@ -77,7 +77,7 @@ module.exports = (app) => {
       email: rEmail,
       username: rUsername,
       password: rPassword,
-      rFyncId: fyncid,
+      fyncid: "not have data",
       wOof: {
         favoritef: favoriteFoods,
         dislike: dislikedFoods,
@@ -271,5 +271,38 @@ module.exports = (app) => {
     } else {
       res.send(updateQuery.$set);
     }
+  });
+
+  app.post("/account/editfyncid", async (req, res) => {
+    const { rUsername, rFyncId } = req.body;
+    if (!rUsername || !rFyncId) {
+      res.send("Not enough info");
+      return;
+    }
+
+    updateQuery = { $set: { fyncid: rFyncId}};
+
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update item amount");
+    } else {
+      res.send(updateQuery.$set);
+    }
+
+  });
+
+  app.get("/account/getbyfync/:FyncId", async (req, res) => {
+    var rFyncId = req.params.FyncId; // Retrieve the username from the request body
+    // Check if the username is null or undefined
+    // Query the database for an Account document that has the specified username
+    var userAccount = await Account.findOne({ fyncid: rFyncId });
+    console.log(userAccount.username);
+    res.send(userAccount.username); // Send the user data as a response
+    return;
   });
 };
