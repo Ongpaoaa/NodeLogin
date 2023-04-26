@@ -253,18 +253,13 @@ module.exports = (app) => {
     } else {
     }
     const Names = "item." + rItemName;
-
-    if (userAccount.item[rItemName] > 1){
-      userAccount.item[rItemName] -= 1;
+    
+    if (itemAmount > 1){
+      updateQuery = { $set: { [Names]: itemAmount}};
     }
-    else if (userAccount.item[rItemName] == 1){
-      db.item.update({},{$unset: {[Names] : userAccount.item[rItemName] }});
+    else if (itemAmount == 1){
+      updateQuery = {$unset: {[Names] : itemAmount }};
     }
-
-    const updateQuery = {
-      $set: { [Names]: userAccount.item[rItemName] - 400},
-    };
-
     const updateResult = await Account.updateOne(
       { username: rUsername },
       updateQuery
