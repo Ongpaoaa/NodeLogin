@@ -199,8 +199,10 @@ module.exports = (app) => {
       const recievedAccount = await Account.findOne({
         username: rRecieveperson,
       }); // Look up the account of the receiver
-      delete recievedAccount.pending[rSentedperson]; // Remove the sent gift from the receiver's pending gifts
-      await recievedAccount.save(); // Save the updated account data
+      await recievedAccount.updateOne(
+        { $unset: { [`pending.${rSentedperson}`]: 1 } },
+        { new: true }
+      ); // Remove the sent gift from the receiver's pending gifts
       console.log(recievedAccount); // Log the updated account data
       res.send("Gift received successfully."); // Send success message
     } catch (err) {
