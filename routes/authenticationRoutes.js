@@ -135,6 +135,18 @@ module.exports = (app) => {
     }
   });
 
+  app.get("/account/getdata/:username", async (req, res) => {
+    var rusername = req.params.username; // Retrieve the username from the request body
+    console.log(rusername);
+    // Check if the username is null or undefined
+
+    // Query the database for an Account document that has the specified username
+    var userAccount = await Account.findOne({ username: rusername });
+    console.log(userAccount);
+    res.send(userAccount); // Send the user data as a response
+    return;
+  });
+  
   // This route allows clients to retrieve user data based on a provided username
   app.post("/account/sentgift", async (req, res) => {
     try {
