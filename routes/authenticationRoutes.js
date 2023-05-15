@@ -152,40 +152,54 @@ module.exports = (app) => {
   app.post("/account/sentgift", async (req, res) => {
     // Extract the required fields from the request body
     const { rSentedperson, rRecieveperson, rGift } = req.body;
-
+  
     // Check if all the required fields are present
     if (!rSentedperson || !rRecieveperson || !rGift) {
       // Send a "Not enough info" response to the client and return from the function
       res.send("Not enough info");
       return;
     }
-
-    // Look up the sender and receiver accounts in the database
-    const sentedAccount = await Account.findOne({ username: rSentedperson });
-    const recievedAccount = await Account.findOne({ username: rRecieveperson });
-
-    // Convert the value of the gift in the receiver's and sender's item object to an integer
-    const dulp = parseInt(recievedAccount.item[rGift]);
-    const dulp2 = parseInt(sentedAccount.item[rGift]);
-
-    // Construct an object to update the sender's account in the database
-    const obj2 = { [`item.${rGift}`]: dulp2 - 1 };
-
-    // Update the sender's account in the database with the new gift count
-    await Account.updateOne({ username: rSentedperson }, { $set: obj2 });
-
-    // Check if the gift is not in the receiver's item object
-    if (isNaN(dulp)) {
-      // Construct an object to update the receiver's pending gift list in the database
-      const obj = { [`pending.${rSentedperson}`]: rGift };
-
-      // Update the receiver's account in the database with the pending gift
-      await Account.updateOne({ username: rRecieveperson }, { $set: obj });
-
-      // Send a "complete1" response to the client
-      res.send("complete1");
+  
+    try {
+      // Look up the sender and receiver accounts in the database
+      const sentedAccount = await Account.findOne({ username: rSentedperson });
+      const receivedAccount = await Account.findOne({ username: rRecieveperson });
+  
+      if (!sentedAccount || !receivedAccount) {
+        // Send an error response if either the sender or receiver account is not found
+        res.send("Sender or receiver account not found");
+        return;
+      }
+  
+      // Convert the value of the gift in the receiver's and sender's item object to an integer
+      const receivedGiftCount = receivedAccount.item[rGift];
+      const sentGiftCount = sentedAccount.item[rGift];
+  
+      if (receivedGiftCount === undefined || sentGiftCount === undefined) {
+        // Send an error response if the gift is not found in the sender's or receiver's item object
+        res.send("Gift not found in sender's or receiver's item object");
+        return;
+      }
+  
+      // Update the sender's account in the database by decrementing the gift count
+      sentedAccount.item[rGift] = sentGiftCount - 1;
+      await sentedAccount.save();
+  
+      if (isNaN(receivedGiftCount)) {
+        // If the gift is not in the receiver's item object, add it to their pending gifts
+        receivedAccount.pending[rSentedperson] = rGift;
+        await receivedAccount.save();
+      }
+  
+      // Send a success response to the client
+      res.send("Gift sent successfully");
+    } catch (err) {
+      // Handle any errors that occur during the process
+      console.error(err);
+      res.status(500).send("Internal server error");
     }
   });
+  
 
   // Handle POST requests to '/account/recievegift'
   app.post("/account/recievegift", async (req, res) => {
