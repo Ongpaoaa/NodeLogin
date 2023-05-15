@@ -136,34 +136,21 @@ module.exports = (app) => {
   });
 
   // This route allows clients to retrieve user data based on a provided username
-  app.get("/account/getdata/:username", async (req, res) => {
-    var rusername = req.params.username; // Retrieve the username from the request body
-    console.log(rusername);
-    // Check if the username is null or undefined
-
-    // Query the database for an Account document that has the specified username
-    var userAccount = await Account.findOne({ username: rusername });
-    console.log(userAccount);
-    res.send(userAccount); // Send the user data as a response
-    return;
-  });
-
-  // Handle HTTP POST requests to the "/account/sentgift" route
   app.post("/account/sentgift", async (req, res) => {
-    // Extract the required fields from the request body
-    const { rSentedperson, rRecieveperson, rGift } = req.body;
-  
-    // Check if all the required fields are present
-    if (!rSentedperson || !rRecieveperson || !rGift) {
-      // Send a "Not enough info" response to the client and return from the function
-      res.send("Not enough info");
-      return;
-    }
-  
     try {
+      // Extract the required fields from the request body
+      const { rSentedPerson, rRecievePerson, rGift } = req.body;
+  
+      // Check if all the required fields are present
+      if (!rSentedPerson || !rRecievePerson || !rGift) {
+        // Send a "Not enough info" response to the client and return from the function
+        res.send("Not enough info");
+        return;
+      }
+  
       // Look up the sender and receiver accounts in the database
-      const sentedAccount = await Account.findOne({ username: rSentedperson });
-      const receivedAccount = await Account.findOne({ username: rRecieveperson });
+      const sentedAccount = await Account.findOne({ username: rSentedPerson });
+      const receivedAccount = await Account.findOne({ username: rRecievePerson });
   
       if (!sentedAccount || !receivedAccount) {
         // Send an error response if either the sender or receiver account is not found
@@ -171,25 +158,24 @@ module.exports = (app) => {
         return;
       }
   
-      // Convert the value of the gift in the receiver's and sender's item object to an integer
-      const receivedGiftCount = receivedAccount.item[rGift];
-      const sentGiftCount = sentedAccount.item[rGift];
-  
-      if (receivedGiftCount === undefined || sentGiftCount === undefined) {
-        // Send an error response if the gift is not found in the sender's or receiver's item object
-        res.send("Gift not found in sender's or receiver's item object");
+      // Check if the sender has the gift in their item object
+      if (!sentedAccount.item || !sentedAccount.item[rGift]) {
+        // Send an error response if the gift is not found in the sender's item object
+        res.send("Gift not found in sender's item object");
         return;
       }
   
-      // Update the sender's account in the database by decrementing the gift count
-      sentedAccount.item[rGift] = sentGiftCount - 1;
-      await sentedAccount.save();
-  
-      if (isNaN(receivedGiftCount)) {
-        // If the gift is not in the receiver's item object, add it to their pending gifts
-        receivedAccount.pending[rSentedperson] = rGift;
-        await receivedAccount.save();
+      // Initialize the receiver's pending object if it doesn't exist
+      if (!receivedAccount.pending) {
+        receivedAccount.pending = {};
       }
+  
+      // Move the gift from the sender to the receiver's pending gifts
+      receivedAccount.pending[rSentedPerson] = rGift;
+  
+      // Save the updated sender and receiver accounts
+      await sentedAccount.save();
+      await receivedAccount.save();
   
       // Send a success response to the client
       res.send("Gift sent successfully");
