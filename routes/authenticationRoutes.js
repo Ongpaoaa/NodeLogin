@@ -19,7 +19,7 @@ module.exports = (app) => {
         //check password
         userAccount.lastAuthentication = Date.now(); //update date
         await userAccount.save();
-        res.send(userAccount); //send user info
+        res.send("logged In"); //send user info
         return;
       }
     }
