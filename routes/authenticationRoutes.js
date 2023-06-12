@@ -287,6 +287,42 @@ module.exports = (app) => {
     }
   });
 
+  app.post("/account/deletemultipleitem", async (req, res) => {
+    const { rUsername, rItemName, rNumber } = req.body;
+
+    if (!rUsername || !rItemName || !rNumber) {
+      res.send("Not enough info");
+      return;
+    }
+
+    const userAccount = await Account.findOne({ username: rUsername });
+
+    if (userAccount.item.hasOwnProperty(rItemName)) {
+      itemAmount = parseInt(userAccount.item[rItemName]);
+      console.log(parseInt(userAccount.item[rItemName]));
+    } else {
+    }
+    const Names = "item." + rItemName;
+    
+    if (itemAmount > 1){
+      updateQuery = { $set: { [Names]: itemAmount - rNumber}};
+    }
+    else if (itemAmount == 1){
+      updateQuery = {$unset: {[Names] : itemAmount }};
+    }
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update item amount");
+    } else {
+      res.send(updateQuery.$set);
+    }
+  });
+
   app.post("/account/editfyncid", async (req, res) => {
     const { rUsername, rFyncId } = req.body;
     if (!rUsername || !rFyncId) {
