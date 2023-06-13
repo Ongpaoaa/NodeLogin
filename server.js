@@ -19,13 +19,14 @@ mongoose.connect(process.env.mongoURI, {useNewUrlParser: true});
 require('./model/Quest')
 require('./model/Account');
 require('./model/Item');
-
+require('./model/Tag');
 
 
 //setup routes
 require('./routes/authenticationRoutes')(app);
 require('./routes/itemRoutes')(app);
 require('./routes/questRoute')(app);
+require('./routes/adminRoute')(app);
 
 const port = 13756
 app.listen(port, () => {

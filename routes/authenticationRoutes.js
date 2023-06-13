@@ -182,12 +182,30 @@ module.exports = (app) => {
         receivedAccount.pending = {};
       }
   
-      // Move the gift from the sender to the receiver's pending gifts
-      receivedAccount.pending[rSentedPerson] = rGift;
+    receivedAccount.pending = { ...receivedAccount.pending, [rSentedPerson]: rGift };
+    
+    await sentedAccount.save();
+    // Remove the gift from the sender's item object
+    
+    itemAmount = parseInt(sentedAccount.item[rGift]);
+    console.log(parseInt(sentedAccount.item[rGift]));
+    
+    const Names = "item." + rGift;
+    
+    if (itemAmount > 1){
+      updateQuery = { $set: { [Names]: itemAmount - 1}};
+    }
+    else if (itemAmount == 1){
+      updateQuery = {$unset: {[Names] : itemAmount }};
+    }
+
+    const updateResult = await Account.updateOne(
+      { username: sentedAccount },
+      updateQuery
+    );
+    // Save the updated sender and receiver accounts
+    
   
-      // Save the updated sender and receiver accounts
-      await sentedAccount.save();
-      await receivedAccount.save();
   
       // Send a success response to the client
       res.send("Gift sent successfully");
@@ -200,28 +218,34 @@ module.exports = (app) => {
   
 
   // Handle POST requests to '/account/recievegift'
-  app.post("/account/recievegift", async (req, res) => {
-    const { rRecieveperson, rSentedperson } = req.body; // Extract data from request body
-    if (rSentedperson == null || rRecieveperson == null) {
-      // Check if both data are present
-      res.send("Not enough info"); // Send error message if data is missing
+  app.post("/account/receivegift", async (req, res) => {
+    const { rReceivePerson, rSentedPerson } = req.body;
+
+  if (!rReceivePerson || !rSentedPerson) {
+    res.send("Not enough info");
+    return;
+  }
+
+  try {
+    const receivedAccount = await Account.findOne({ username: rReceivePerson });
+
+    if (!receivedAccount.pending || !receivedAccount.pending[rSentedPerson]) {
+      res.send("Gift not found in receiver's pending gifts");
       return;
     }
-    try {
-      const recievedAccount = await Account.findOne({
-        username: rRecieveperson,
-      }); // Look up the account of the receiver
-      await recievedAccount.updateOne(
-        { $unset: { [`pending.${rSentedperson}`]: 1 } },
-        { new: true }
-      ); // Remove the sent gift from the receiver's pending gifts
-      console.log(recievedAccount); // Log the updated account data
-      res.send("Gift received successfully."); // Send success message
-    } catch (err) {
-      console.error(err); // Log any errors that occur
-      res.status(500).send("Internal server error."); // Send error response
-    }
+
+    await receivedAccount.updateOne({
+      $unset: { [`pending.${rSentedPerson}`]: 1 },
+    });
+
+    console.log(receivedAccount);
+    res.send(receivedAccount);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal server error.");
+  }
   });
+  
 
   app.post("/account/upstat", async (req, res) => {
     const { rUsername, value, stat } = req.body;
@@ -310,6 +334,7 @@ module.exports = (app) => {
 
   });
 
+
   app.get("/account/getbyfync/:FyncId", async (req, res) => {
     var rFyncId = req.params.FyncId; // Retrieve the username from the request body
     // Check if the username is null or undefined
@@ -318,5 +343,41 @@ module.exports = (app) => {
     console.log(userAccount.username);
     res.send(userAccount.username); // Send the user data as a response
     return;
+  });
+
+  app.post("/account/deletemultipleitem", async (req, res) => {
+    const { rUsername, rItemName, rNumber } = req.body;
+
+    if (!rUsername || !rItemName || !rNumber) {
+      res.send("Not enough info");
+      return;
+    }
+
+    const userAccount = await Account.findOne({ username: rUsername });
+
+    if (userAccount.item.hasOwnProperty(rItemName)) {
+      itemAmount = parseInt(userAccount.item[rItemName]);
+      console.log(parseInt(userAccount.item[rItemName]));
+    } else {
+    }
+    const Names = "item." + rItemName;
+    
+    if (itemAmount > 1){
+      updateQuery = { $set: { [Names]: itemAmount - rNumber}};
+    }
+    else if (itemAmount == 1){
+      updateQuery = {$unset: {[Names] : itemAmount }};
+    }
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update item amount");
+    } else {
+      res.send(updateQuery.$set);
+    }
   });
 };
