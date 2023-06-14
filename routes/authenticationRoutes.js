@@ -82,10 +82,12 @@ module.exports = (app) => {
         favoritef: favoriteFoods,
         dislike: dislikedFoods,
         type: "",
+        Level: 0,
+        Exp: 0,
         stat: {
-          CP: 0,
-          EN: 0,
-          MP: 0,
+          HP: 0,
+          SPD: 0,
+          ATK: 0,
           hp: 0,
         },
       },
@@ -416,4 +418,86 @@ module.exports = (app) => {
       res.send(updateQuery.$set);
     }
   });
+
+  app.post("/account/updatelevel", async (req, res) => {
+    const { rUsername } = req.body;
+  
+    if (!rUsername) {
+      res.send("Not enough info");
+      return;
+    }
+    try {
+      const updatedAccount = await Account.findOneAndUpdate(
+        { username: rUsername },
+        { $inc: { "wOof.Level": 1 } },
+        { new: true }
+      );
+  
+      if (!updatedAccount) {
+        res.send("User not found");
+        return;
+      }
+  
+      console.log(updatedAccount.wOof.Level);
+      res.send("Level updated successfully");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal server error");
+    }
+  });
+  
+  app.post("/account/updateEXP", async (req, res) => {
+    const { rUsername, rExp } = req.body;
+  
+    if (!rUsername || !rExp) {
+      res.send("Not enough info");
+      return;
+    }
+    try {
+      const updatedAccount = await Account.findOneAndUpdate(
+        { username: rUsername },
+        { $inc: { "wOof.Exp": parseInt(rExp) } },
+        { new: true }
+      );
+  
+      if (!updatedAccount) {
+        res.send("User not found");
+        return;
+      }
+  
+      console.log(updatedAccount.wOof.Level);
+      res.send("Exp updated successfully");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal server error");
+    }
+  });
+  
+  app.post("/account/resetEXP", async (req, res) => {
+    const { rUsername} = req.body;
+  
+    if (!rUsername) {
+      res.send("Not enough info");
+      return;
+    }
+    try {
+      const updatedAccount = await Account.findOneAndUpdate(
+        { username: rUsername },
+        { $set: { "wOof.Exp": 0 } },
+        { new: true }
+      );
+  
+      if (!updatedAccount) {
+        res.send("User not found");
+        return;
+      }
+  
+      console.log(updatedAccount.wOof.Level);
+      res.send("Exp updated successfully");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal server error");
+    }
+  });
+  
 };
