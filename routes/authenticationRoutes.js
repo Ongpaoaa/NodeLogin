@@ -148,7 +148,6 @@ module.exports = (app) => {
     res.send(userAccount); // Send the user data as a response
     return;
   });
-  
   // This route allows clients to retrieve user data based on a provided username
   app.post("/account/sentgift", async (req, res) => {
     try {
@@ -218,7 +217,6 @@ module.exports = (app) => {
     }
   });
   
-
   // Handle POST requests to '/account/recievegift'
   app.post("/account/receivegift", async (req, res) => {
     const { rReceivePerson, rSentedPerson } = req.body;
@@ -246,35 +244,6 @@ module.exports = (app) => {
     console.error(err);
     res.status(500).send("Internal server error.");
   }
-  });
-  
-
-  app.post("/account/upstat", async (req, res) => {
-    const { rUsername, value, stat } = req.body;
-    try {
-      const filter = { username: rUsername };
-      const acc = await Account.findOneAndUpdate(filter);
-      const update = {
-        $set: {
-          "wOof.stat": {
-            ...acc.wOof.stat, // Keep the old values of wOof.stat
-            [stat]: parseInt(value), // Set the new value for the specified stat
-          },
-        },
-      };
-      const options = { new: true }; // Return the updated document
-      const updatedAcc = await Account.findOneAndUpdate(
-        filter,
-        update,
-        options
-      );
-
-      console.log(updatedAcc);
-      res.send(updatedAcc);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send("Internal server error.");
-    }
   });
 
   app.post("/account/deleteitem", async (req, res) => {
@@ -313,7 +282,7 @@ module.exports = (app) => {
     }
   });
 
-  app.post("/account/deletemultipleitem", async (req, res) => {
+  app.post("/account/deleteMultipleitem", async (req, res) => {
     const { rUsername, rItemName, rNumber } = req.body;
 
     if (!rUsername || !rItemName || !rNumber) {
@@ -336,6 +305,41 @@ module.exports = (app) => {
     else if (itemAmount == 1){
       updateQuery = {$unset: {[Names] : itemAmount }};
     }
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update item amount");
+    } else {
+      res.send(updateQuery.$set);
+    }
+  });
+
+  app.post("/account/addMultipleitem", async (req, res) => {
+
+    const { rUsername, rItemName ,rNumber} = req.body;
+
+    if (!rUsername || !rItemName || !rNumber) {
+      res.send("Not enough info");
+      return;
+    }
+
+    const userAccount = await Account.findOne({ username: rUsername });
+    let itemAmount = 0;
+    if (userAccount.item.hasOwnProperty(rItemName)) {
+      itemAmount = parseInt(userAccount.item[rItemName]);
+      console.log(parseInt(userAccount.item[rItemName]));
+    } else {
+      itemAmount = 0;
+    }
+    const Names = "item." + rItemName;
+
+    const updateQuery = {
+      $set: { [Names]: itemAmount + parseInt(rNumber) },
+    };
 
     const updateResult = await Account.updateOne(
       { username: rUsername },
@@ -383,121 +387,5 @@ module.exports = (app) => {
     return;
   });
 
-  app.post("/account/deletemultipleitem", async (req, res) => {
-    const { rUsername, rItemName, rNumber } = req.body;
-
-    if (!rUsername || !rItemName || !rNumber) {
-      res.send("Not enough info");
-      return;
-    }
-
-    const userAccount = await Account.findOne({ username: rUsername });
-
-    if (userAccount.item.hasOwnProperty(rItemName)) {
-      itemAmount = parseInt(userAccount.item[rItemName]);
-      console.log(parseInt(userAccount.item[rItemName]));
-    } else {
-    }
-    const Names = "item." + rItemName;
-    
-    if (itemAmount > 1){
-      updateQuery = { $set: { [Names]: itemAmount - rNumber}};
-    }
-    else if (itemAmount == 1){
-      updateQuery = {$unset: {[Names] : itemAmount }};
-    }
-
-    const updateResult = await Account.updateOne(
-      { username: rUsername },
-      updateQuery
-    );
-
-    if (updateResult.nModified === 0) {
-      res.send("Failed to update item amount");
-    } else {
-      res.send(updateQuery.$set);
-    }
-  });
-
-  app.post("/account/updatelevel", async (req, res) => {
-    const { rUsername } = req.body;
-  
-    if (!rUsername) {
-      res.send("Not enough info");
-      return;
-    }
-    try {
-      const updatedAccount = await Account.findOneAndUpdate(
-        { username: rUsername },
-        { $inc: { "wOof.Level": 1 } },
-        { new: true }
-      );
-  
-      if (!updatedAccount) {
-        res.send("User not found");
-        return;
-      }
-  
-      console.log(updatedAccount.wOof.Level);
-      res.send("Level updated successfully");
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal server error");
-    }
-  });
-  
-  app.post("/account/updateEXP", async (req, res) => {
-    const { rUsername, rExp } = req.body;
-  
-    if (!rUsername || !rExp) {
-      res.send("Not enough info");
-      return;
-    }
-    try {
-      const updatedAccount = await Account.findOneAndUpdate(
-        { username: rUsername },
-        { $inc: { "wOof.Exp": parseInt(rExp) } },
-        { new: true }
-      );
-  
-      if (!updatedAccount) {
-        res.send("User not found");
-        return;
-      }
-  
-      console.log(updatedAccount.wOof.Level);
-      res.send("Exp updated successfully");
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal server error");
-    }
-  });
-  
-  app.post("/account/resetEXP", async (req, res) => {
-    const { rUsername} = req.body;
-  
-    if (!rUsername) {
-      res.send("Not enough info");
-      return;
-    }
-    try {
-      const updatedAccount = await Account.findOneAndUpdate(
-        { username: rUsername },
-        { $set: { "wOof.Exp": 0 } },
-        { new: true }
-      );
-  
-      if (!updatedAccount) {
-        res.send("User not found");
-        return;
-      }
-  
-      console.log(updatedAccount.wOof.Level);
-      res.send("Exp updated successfully");
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal server error");
-    }
-  });
   
 };

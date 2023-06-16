@@ -27,6 +27,7 @@ require('./routes/authenticationRoutes')(app);
 require('./routes/itemRoutes')(app);
 require('./routes/questRoute')(app);
 require('./routes/adminRoute')(app);
+require('./routes/wOofRoute')(app);
 
 const port = 13756
 app.listen(port, () => {
