@@ -208,5 +208,15 @@ module.exports = (app) => {
         }
     });
 
-
+    app.get("/tag/get/:tagName", async (req, res) => {
+        var rTag = req.params.tagName; // Retrieve the username from the request body
+        console.log(rTag);
+        // Check if the username is null or undefined
+    
+        // Query the database for an Account document that has the specified username
+        var tagData = await Tag.findOne({ tag: rTag });
+        console.log(tagData);
+        res.send(tagData); // Send the user data as a response
+        return;
+      });
 };
