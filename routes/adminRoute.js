@@ -219,4 +219,16 @@ module.exports = (app) => {
         res.send(tagData); // Send the user data as a response
         return;
       });
+
+      app.get("/tag/getAll", async (req, res) => {
+
+        try {
+            // Retrieve all tag documents from the database
+            const tags = await Tag.find();
+            res.send(tags);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("Internal server error");
+        }
+      });
 };
