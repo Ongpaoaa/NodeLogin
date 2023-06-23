@@ -261,38 +261,39 @@ module.exports = (app) => {
   });
 
   app.post("/item/addMultiple", async (req, res) => {
-
-    const { rUsername, rItemName ,rNumber} = req.body;
-
+    const { rUsername, rItemName, rNumber } = req.body;
+  
     if (!rUsername || !rItemName || !rNumber) {
       res.send("Not enough info");
       return;
     }
-
+  
     const userAccount = await Account.findOne({ username: rUsername });
-    let itemAmount = 0;
-    if (userAccount.item.hasOwnProperty(rItemName)) {
-      itemAmount = parseInt(userAccount.item[rItemName]);
-      console.log(parseInt(userAccount.item[rItemName]));
-    } else {
-      itemAmount = 0;
+  
+    if (!userAccount) {
+      res.send("User not found");
+      return;
     }
-    const Names = "item." + rItemName;
-
+  
+    let itemAmount = 0;
+    if (userAccount.item && userAccount.item.hasOwnProperty(rItemName)) {
+      itemAmount = parseInt(userAccount.item[rItemName]);
+    }
+  
+    const updatedItemAmount = itemAmount + parseInt(rNumber);
+  
     const updateQuery = {
-      $set: { [Names]: itemAmount + parseInt(rNumber) },
+      $set: { [`item.${rItemName}`]: updatedItemAmount },
     };
-
-    const updateResult = await Account.updateOne(
-      { username: rUsername },
-      updateQuery
-    );
-
+  
+    const updateResult = await Account.updateOne({ username: rUsername }, updateQuery);
+  
     if (updateResult.nModified === 0) {
       res.send("Failed to update item amount");
     } else {
       res.send(updateQuery.$set);
     }
   });
+  
 
 };
