@@ -4,33 +4,30 @@ const Tag = mongoose.model("tags");
 
 module.exports = (app) => {
 
-    app.post("/wOof/upstat", async (req, res) => {
-        const { rUsername, value, stat } = req.body;
-        try {
-          const filter = { username: rUsername };
-          const acc = await Account.findOneAndUpdate(filter);
-          const update = {
-            $set: {
-              "wOof.stat": {
-                ...acc.wOof.stat, // Keep the old values of wOof.stat
-                [stat]: parseInt(value), // Set the new value for the specified stat
-              },
-            },
-          };
-          const options = { new: true }; // Return the updated document
-          const updatedAcc = await Account.findOneAndUpdate(
-            filter,
-            update,
-            options
-          );
-    
-          console.log(updatedAcc);
-          res.send(updatedAcc);
-        } catch (err) {
-          console.log(err);
-          res.status(500).send("Internal server error.");
-        }
-      });
+  app.post("/wOof/upstat", async (req, res) => {
+    const { rUsername, value, stat } = req.body;
+
+    if (!rUsername || !value || !stat) {
+      res.send("Not enough information provided");
+      return;
+    }
+  
+    try {
+      const updateResult = await Account.updateOne(
+        { username: rUsername },
+        { $set: { [`wOof.stat.${value}`]: parseInt(stat) } }
+      );
+  
+      if (updateResult.nModified === 0) {
+        res.send("Failed to update stat");
+      } else {
+        res.send("Stat updated successfully");
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Internal server error");
+    }
+  });
 
     app.post("/wOof/updatelevel", async (req, res) => {
     const { rUsername } = req.body;
