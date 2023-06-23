@@ -15,7 +15,7 @@ module.exports = (app) => {
     try {
       const updateResult = await Account.updateOne(
         { username: rUsername },
-        { $set: { [`wOof.stat.${value}`]: parseInt(stat) } }
+        { $set: { [`wOof.stat.${stat}`]: parseInt(value) } }
       );
   
       if (updateResult.nModified === 0) {
