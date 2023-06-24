@@ -115,6 +115,12 @@ module.exports = (app) => {
     return;
   });
 
+
+  app.get("/account/getDataAll", async (req, res) => {
+    const allAccount = await Account.find();
+    res.send(allAccount);
+  });
+
   app.post("/account/editFyncId", async (req, res) => {
     const { rUsername, rFyncId } = req.body;
     if (!rUsername || !rFyncId) {
