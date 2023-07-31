@@ -247,7 +247,10 @@ module.exports = (app) => {
     else if (itemAmount == 1){
       updateQuery = {$unset: {[Names] : itemAmount }};
     }
-
+    else if (itemAmount == 0){
+      updateQuery = {$unset: {[Names] : itemAmount }};
+    }
+    
     const updateResult = await Account.updateOne(
       { username: rUsername },
       updateQuery
