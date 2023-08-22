@@ -295,5 +295,23 @@ module.exports = (app) => {
     }
   });
   
+  app.get('/item/checkAmount/:username/:itemname', async function (req, res) {
+    var rusername = req.params.username; // Retrieve the username from the request body
+    var ritemname = req.params.itemname;
+    console.log(ritemname);
+  
+    try {
+      var userAccount = await Account.findOne({ username: rusername });
+      if (userAccount) {
+        let itemNo = userAccount.item[ritemname];
+        res.send(itemNo.toString()); // Send the item number data as a response
+      } else {
+        res.status(404).send({ message: 'User not found' }); // Send error message if user not found
+      }
+    } catch(err) {
+      console.error(err);
+      res.status(500).send({ message: 'Server error' }); // Send error message if there's a server error
+    }
+  });
 
 };
