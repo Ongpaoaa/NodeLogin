@@ -220,7 +220,7 @@ module.exports = (app) => {
         return;
       });
 
-      app.get("/tag/getAll", async (req, res) => {
+    app.get("/tag/getAll", async (req, res) => {
 
         try {
             // Retrieve all tag documents from the database
@@ -230,5 +230,7 @@ module.exports = (app) => {
             console.error(err);
             res.status(500).send("Internal server error");
         }
-      });
+    });
+
+    
 };
