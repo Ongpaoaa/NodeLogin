@@ -226,4 +226,56 @@ module.exports = (app) => {
   }
 });
 
+app.post("/quest/weeklyClearquest", async (req, res) => {
+  const { rUsername, rQuestno } = req.body;
+
+  if (!rUsername || rQuestno === undefined) {
+    res.send("Not enough info");
+    return;
+  }
+
+  try {
+    const userAccount = await Account.findOne({ username: rUsername });
+
+    if (!userAccount) {
+      res.send(`Account not found for username: ${rUsername}`);
+      return;
+    }
+
+    const questArray = userAccount.weeklyQuest;
+
+    if (rQuestno >= questArray.length || rQuestno < 0) {
+      res.send(`Invalid quest index: ${rQuestno}`);
+      return;
+    }
+
+    // unset the entire object at the specified index
+    questArray[rQuestno] = undefined;
+
+    // remove the undefined elements from the questArray
+    const filteredQuestArray = questArray.filter((weeklyQuest) => weeklyQuest !== undefined);
+
+    // update the user account with the filtered quest array
+    const updateQuery = {
+      $set: {
+        weeklyQuest: filteredQuestArray,
+      },
+    };
+
+    const updateResult = await Account.updateOne(
+      { username: rUsername },
+      updateQuery
+    );
+
+    if (updateResult.nModified === 0) {
+      res.send("Failed to update quest");
+    } else {
+      res.send(updateQuery.$set);
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ error: "Server error" });
+  }
+});
+
 };
