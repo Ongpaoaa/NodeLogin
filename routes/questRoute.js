@@ -74,6 +74,38 @@ module.exports = (app) => {
     }
   });
 
+  app.post("/quest/weeklyGive", async (req, res) => {
+    const { rUsername } = req.body;
+    const { rName } = req.body;
+    // const qDescription = await quest.findOne({qName:rName})
+    // const qAccount = await Account.findOne({username:rUsername})
+
+    try {
+      const qAccount = await Account.findOne({ username: rUsername });
+      const questAmount = qAccount.weeklyQuest.length;
+      if (questAmount < 3) {
+        await Account.updateOne(
+          { username: rUsername },
+          {
+            $push: {
+              weeklyQuest: {
+                rName,
+                progress: 0,
+              },
+            },
+          },
+          { new: true }
+        );
+        res.send(qAccount);
+      } else {
+        res.send("already have 3 quest");
+      }
+    } catch (err) {
+      // Handle error
+      console.error(err);
+    }
+  });
+
   app.post("/quest/update", async (req, res) => {
     const { rUsername } = req.body;
     const { rQuestno } = req.body;
@@ -81,6 +113,25 @@ module.exports = (app) => {
       const qAccount = await Account.findOne({ username: rUsername });
       const objects = "quest." + String(rQuestno) +  ".progress";
       let progress = qAccount.quest[rQuestno].progress + 1;
+      await qAccount.updateOne(
+        { "$set": { [objects]: progress } }
+      )
+      console.log([objects], progress);
+      res.send(qAccount);
+  
+    } catch (err) {
+      // Handle error
+      console.error(err);
+    }
+  });
+
+  app.post("/quest/weeklyUpdate", async (req, res) => {
+    const { rUsername } = req.body;
+    const { rQuestno } = req.body;
+    try {
+      const qAccount = await Account.findOne({ username: rUsername });
+      const objects = "weeklyQuest." + String(rQuestno) +  ".progress";
+      let progress = qAccount.weeklyQuest[rQuestno].progress + 1;
       await qAccount.updateOne(
         { "$set": { [objects]: progress } }
       )

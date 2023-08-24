@@ -6,17 +6,18 @@ module.exports = (app) => {
 
   app.post("/wOof/upstat", async (req, res) => {
     const { rUsername, value, stat } = req.body;
-
+  
     if (!rUsername || !value || !stat) {
       res.send("Not enough information provided");
       return;
     }
   
     try {
-      const updateResult = await Account.updateOne(
-        { username: rUsername },
-        { $set: { [`wOof.stat.${stat}`]: parseInt(value) } }
-      );
+      const updateQuery = {
+        $inc: { [`wOof.stat.${stat}`]: parseInt(value) }
+      };
+  
+      const updateResult = await Account.updateOne({ username: rUsername }, updateQuery);
   
       if (updateResult.nModified === 0) {
         res.send("Failed to update stat");
@@ -28,6 +29,7 @@ module.exports = (app) => {
       res.status(500).send("Internal server error");
     }
   });
+  
 
     app.post("/wOof/updatelevel", async (req, res) => {
     const { rUsername } = req.body;
